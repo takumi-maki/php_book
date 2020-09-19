@@ -13,7 +13,7 @@
 <body>
     <div id="wrap">
         <div id="head">
-            <h1>ひとこと掲示板</h1>
+            <h1>会員登録</h1>
         </div>
         <div id="content">
             <p>ユーザー登録が完了しました</p>
