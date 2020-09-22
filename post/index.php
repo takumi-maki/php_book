@@ -15,15 +15,16 @@ if (isset($_SESSION['id']) && $_SESSION['time'] + 3600 > time()) {
 // 投稿を記録する
 if (!empty($_POST)) {
 	if ($_POST['message'] != '') {
-		$message = $db->prepare('INSERT INTO posts SET member_id=?, message=?,reply_post_id=?, created=NOW()');
+		$message = $db->prepare('INSERT INTO posts SET member_id=?, message=?, reply_post_id=?, created=NOW()');
 		$message->execute(array(
 			$member['id'],
-            $_POST['message'],
-            $_POST['reply_post_id']
+			$_POST['message'],
+			$_POST['reply_post_id']
 		));
 		header('Location: index.php'); exit();
 	}
 }
+
 
 // 投稿を取得する
 $posts = $db->query('SELECT m.name, m.picture, p.* FROM members m, posts p WHERE m.id=p.member_id ORDER BY p.created DESC');
@@ -33,7 +34,7 @@ if (isset($_REQUEST['res'])) {
 	$response = $db->prepare('SELECT m.name, m.picture, p.* FROM members m,	posts p WHERE m.id=p.member_id AND p.id=? ORDER BY p.created DESC');
 		$response->execute(array($_REQUEST['res']));
 		$table = $response->fetch();
-		$message = '@' . $table['name'] . ' ' . $table['message'];
+		$message = '@' . $table['name'] . 'さん ' . $table['message'];
 	}
 
 ?>
@@ -76,12 +77,22 @@ if (isset($_REQUEST['res'])) {
 		foreach ($posts as $post):
 		?>
             <div class="msg">
-                <img src="member_picture/<?php echo htmlspecialchars($post['picture'], ENT_QUOTES); ?>" width="48"
-                    height="48" alt="<?php echo htmlspecialchars($post['name'], ENT_QUOTES); ?>" />
+                <a href="view.php?id=<?php echo htmlspecialchars($post['id'], ENT_QUOTES); ?> ">
+                    <img src="member_picture/<?php echo htmlspecialchars($post['picture'], ENT_QUOTES); ?>" width="48"
+                        height="48" alt="<?php echo htmlspecialchars($post['name'], ENT_QUOTES); ?>" /></a>
                 <p><?php echo htmlspecialchars($post['message'], ENT_QUOTES);?><span
                         class="name">（<?php echo htmlspecialchars($post['name'], ENT_QUOTES); ?>）</span></p>
-                　[<a href="index.php?res=<?php echo htmlspecialchars($post['id'], ENT_QUOTES); ?> ">Re</a>]
-                <p class="day"><?php echo htmlspecialchars($post['created'], ENT_QUOTES); ?></p>
+                　[<a href="index.php?res=<?php echo htmlspecialchars($post['id'], ENT_QUOTES); ?> ">Re</a>]</p>
+                <p class="day"><?php echo htmlspecialchars($post['created'], ENT_QUOTES); ?>
+                    <?php if($post['reply_post_id'] > 0):
+                ?>
+                    <a
+                        href="view.php?=id<?php echo htmlspecialchars($post['reply_post_id'], ENT_QUOTES); ?> ">返信元のメッセージ</a>
+                </p>
+                <?php 
+            endif;
+            ?>
+
             </div>
             <?php
 		endforeach;
