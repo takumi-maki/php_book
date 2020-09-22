@@ -38,9 +38,10 @@
 
             <?php while ($memo = $memos->fetch()): ?>
             <p>
+                <?php echo mb_substr($memo['memo'], 0,50); ?>
+                <?php echo (mb_strlen($memo['memo']) > 50 ? '...' : '' ); ?>
                 <a href="memo.php?id=<?php echo $memo['id']; ?>">
-                    <?php echo mb_substr($memo['memo'], 0,50); ?>
-                    <?php echo (mb_strlen($memo['memo']) > 50 ? '...' : '' ); ?>
+                    <p>詳しくみる</p>
                 </a>
             </p>
             <time><?php echo $memo['created_at']; ?></time>
