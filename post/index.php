@@ -25,9 +25,25 @@ if (!empty($_POST)) {
 	}
 }
 
-
 // 投稿を取得する
-$posts = $db->query('SELECT m.name, m.picture, p.* FROM members m, posts p WHERE m.id=p.member_id ORDER BY p.created DESC');
+$page = $_REQUEST['page'];
+if ($page == '') {
+	$page = 1;
+}
+$page = max($page, 1);
+
+// 最終ページを取得する
+$counts = $db->query('SELECT COUNT(*) AS cnt FROM posts');
+$cnt = $counts->fetch();
+$maxPage = ceil($cnt['cnt'] / 5);
+$page = min($page, $maxPage);
+
+$start = ($page - 1) * 5;
+$start = max(0, $start);
+
+$posts = $db->prepare('SELECT m.name, m.picture, p.* FROM members m, posts p WHERE m.id=p.member_id ORDER BY p.created DESC LIMIT ?, 5');
+$posts->bindParam(1, $start, PDO::PARAM_INT);
+$posts->execute();
 
 // 返信の場合
 if (isset($_REQUEST['res'])) {
@@ -45,6 +61,8 @@ function h($value) {
 function makeLink($value){
     return mb_ereg_replace("(https?|ftp)(://[[:alnum:]\+\$\;\?\.%,!#~*/:@&=_-]+)", '<a href="\\1\\2\">\\1\\2</a>' , $value);
 }
+
+
 
 ?>
 
@@ -66,6 +84,7 @@ function makeLink($value){
         <div id="head">
             <h1>ひとこと掲示板</h1>
         </div>
+        <div style="text-align: right"><a href="logout.php">ログアウト</a></div>
         <div id="content">
             <form action="" method="post">
                 <dl>
@@ -110,6 +129,30 @@ function makeLink($value){
             <?php
 		endforeach;
 		?>
+            <ul class="paging">
+                <?php
+                if ($page > 1) {
+                ?>
+                <li><a href="index.php?page=<?php print($page - 1); ?>">前のページへ</a></li>
+                <?php
+                } else {
+                ?>
+                <li>前のページへ</li>
+                <?php
+                }
+                ?>
+                <?php
+                if ($page < $maxPage) {
+                ?>
+                <li><a href="index.php?page=<?php print($page + 1); ?>">次のページへ</a></li>
+                <?php
+                } else {
+                ?>
+                <li>次のページへ</li>
+                <?php
+                }
+                ?>
+            </ul>
         </div>
 
     </div>
